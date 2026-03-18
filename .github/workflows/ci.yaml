@@ -18,6 +18,8 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 25
+          node-version: 24
       - run: npm ci
+        env:
+          DATABASE_URL: postgresql://dummy_user:dummy_pass@localhost:5432/discussion_forum
       - run: npm run build
