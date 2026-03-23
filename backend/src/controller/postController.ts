@@ -27,8 +27,14 @@ export async function getById(req: Request<{ id: string }>, res: Response) {
 
 export async function create(req: Request, res: Response) {
     try {
-        const body = req.body;
-        const post = await postService.createPost(body);
+        if (!req.user) {
+            res.status(401).json({ error: "Unauthorized" });
+            return;
+        }
+        const post = await postService.createPost({
+            ...req.body,
+            authorId: req.user.userId,
+        });
         res.status(201).json(post);
     } catch (error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -45,13 +51,24 @@ export async function create(req: Request, res: Response) {
 
 export async function update(req: Request<{ id: string }>, res: Response) {
     try {
+        if (!req.user) {
+            res.status(401).json({ error: "Unauthorized" });
+            return;
+        }
+
         const id = Number(req.params.id);
-        const body = req.body;
-        const post = await postService.updatePost(id, body);
-        if (!post) {
+        const existing = await postService.getPostById(id);
+        if (!existing) {
             res.status(404).json({ error: "Post not found" });
             return;
         }
+        if (existing.authorId !== req.user.userId) {
+            res.status(403).json({ error: "Forbidden" });
+            return;
+        }
+
+        const body = req.body;
+        const post = await postService.updatePost(id, body);
         res.json(post);
     } catch (error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -66,7 +83,22 @@ export async function update(req: Request<{ id: string }>, res: Response) {
 
 export async function remove(req: Request<{ id: string }>, res: Response) {
     try {
+        if (!req.user) {
+            res.status(401).json({ error: "Unauthorized" });
+            return;
+        }
+
         const id = Number(req.params.id);
+        const existing = await postService.getPostById(id);
+        if (!existing) {
+            res.status(404).json({ error: "Post not found" });
+            return;
+        }
+        if (existing.authorId !== req.user.userId) {
+            res.status(403).json({ error: "Forbidden" });
+            return;
+        }
+
         await postService.deletePost(id);
         res.status(204).send();
     } catch (error) {

@@ -4,14 +4,15 @@ import {
     createPostSchema,
     updatePostSchema,
 } from "../middleware/schemas/postSchemas.js";
+import { requireAuth } from "../middleware/requireAuth.js";
 import * as postController from "../controller/postController.js";
 
 const router = Router();
 
 router.get("/", postController.getAll);
 router.get("/:id", postController.getById);
-router.post("/", validate(createPostSchema), postController.create);
-router.put("/:id", validate(updatePostSchema), postController.update);
-router.delete("/:id", postController.remove);
+router.post("/", requireAuth, validate(createPostSchema), postController.create);
+router.put("/:id", requireAuth, validate(updatePostSchema), postController.update);
+router.delete("/:id", requireAuth, postController.remove);
 
 export default router;

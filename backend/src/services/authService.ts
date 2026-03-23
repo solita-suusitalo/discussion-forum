@@ -1,7 +1,8 @@
 import prisma from "../db.js";
+import bcrypt from "bcryptjs";
+import { SignJWT } from "jose";
 
-// TODO: install bcrypt and jsonwebtoken (or a library like jose) to complete this service.
-// Example: npm install bcrypt jsonwebtoken && npm install -D @types/bcrypt @types/jsonwebtoken
+const JWT_EXPIRY = "24h";
 
 export async function login(
     email: string,
@@ -10,15 +11,22 @@ export async function login(
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return null;
 
-    // TODO: replace with bcrypt.compare(password, user.password)
-    const passwordMatch = password === user.password;
+    const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) return null;
 
-    // TODO: replace with jwt.sign({ sub: user.userId }, process.env.JWT_SECRET, { expiresIn: "1d" })
-    const token = "TODO_JWT_TOKEN";
+    const secret = process.env.JWT_SECRET;
+    if (!secret) throw new Error("JWT_SECRET environment variable is not set");
+
+    const token = await new SignJWT({ username: user.username })
+        .setProtectedHeader({ alg: "HS256" })
+        .setSubject(String(user.userId))
+        .setIssuedAt()
+        .setExpirationTime(JWT_EXPIRY)
+        .sign(new TextEncoder().encode(secret));
+
     return { token };
 }
 
 export async function logout(): Promise<void> {
-    // TODO: if using refresh tokens, invalidate the token in the DB here
+    // Stateless JWT: the token expires on its own
 }
