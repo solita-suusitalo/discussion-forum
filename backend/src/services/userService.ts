@@ -1,27 +1,69 @@
-export async function getAllUsers() {
-    // TODO: return all users from DB
-    return [];
+import prisma from "../db.js";
+import type { User } from "../generated/prisma/client.js";
+
+export async function getAllUsers(): Promise<Omit<User, "password">[]> {
+    return prisma.user.findMany({
+        select: {
+            userId: true,
+            email: true,
+            username: true,
+            createdAt: true,
+        },
+    });
 }
 
-export async function getUserById(id: string) {
-    // TODO: return user by id from DB
+export async function getUserById(
+    id: number
+): Promise<Omit<User, "password"> | null> {
     console.log(id);
-    return null;
+    return prisma.user.findUnique({
+        where: {
+            userId: id,
+        },
+        select: {
+            userId: true,
+            email: true,
+            username: true,
+            createdAt: true,
+        },
+    });
 }
 
-export async function createUser(data: unknown) {
-    // TODO: create user in DB
+export async function createUser(
+    data: Omit<User, "createdAt" | "userId">
+): Promise<Omit<User, "password">> {
     console.log(data);
-    return {};
+    return prisma.user.create({
+        data: { ...data },
+    });
 }
 
-export async function updateUser(id: string, data: unknown) {
-    // TODO: update user in DB
+export async function updateUser(
+    id: number,
+    data: Partial<Pick<User, "email" | "username" | "password">>
+): Promise<Omit<User, "password"> | null> {
     console.log(id, data);
-    return null;
+    return prisma.user.update({
+        where: {
+            userId: id,
+        },
+        data: {
+            ...data,
+        },
+        select: {
+            userId: true,
+            email: true,
+            username: true,
+            createdAt: true,
+        },
+    });
 }
 
-export async function deleteUser(id: string) {
-    // TODO: delete user from DB
+export async function deleteUser(id: number): Promise<User> {
     console.log(id);
+    return prisma.user.delete({
+        where: {
+            userId: id,
+        },
+    });
 }
