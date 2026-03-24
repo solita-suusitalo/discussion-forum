@@ -7,7 +7,6 @@ on:
     branches: [main]
 
 jobs:
-  # for now only see if project can be built
   backend:
     name: Backend
     runs-on: ubuntu-latest
@@ -23,4 +22,5 @@ jobs:
         env:
           DATABASE_URL: postgresql://dummy_user:dummy_pass@localhost:5432/discussion_forum
       - run: npm run lint
+      - run: npm run test
       - run: npm run build
