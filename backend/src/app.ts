@@ -9,7 +9,12 @@ import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
 
-app.use(cors());
+// credentials: true is required so the browser accepts Set-Cookie from the API.
+// origin must be an explicit URL (not '*') when credentials are involved.
+app.use(cors({
+    origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+    credentials: true,
+}));
 app.use(express.json());
 
 app.get("/api/healthz", (_req: Request, res: Response) => {

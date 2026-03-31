@@ -1,13 +1,23 @@
 import prisma from "../db.js";
-import type { Post } from "../generated/prisma/client.js";
+import type { Post, Prisma } from "../generated/prisma/client.js";
 
-export async function getAllPosts(): Promise<Post[]> {
-    return prisma.post.findMany();
+const postWithAuthor = {
+    include: {
+        author: {
+            select: { userId: true, username: true },
+        },
+    },
+} as const;
+export type PostWithAuthor = Prisma.PostGetPayload<typeof postWithAuthor>;
+
+export async function getAllPosts(): Promise<PostWithAuthor[]> {
+    return prisma.post.findMany(postWithAuthor);
 }
 
-export async function getPostById(id: number): Promise<Post | null> {
+export async function getPostById(id: number): Promise<PostWithAuthor | null> {
     return prisma.post.findUnique({
         where: { postId: id },
+        ...postWithAuthor,
     });
 }
 
