@@ -25,9 +25,8 @@ const prismaMock = mockDeep<PrismaClient>();
 jest.unstable_mockModule("../src/db.js", () => ({ default: prismaMock }));
 
 // $transaction executes the callback synchronously with the same mock client
-prismaMock.$transaction.mockImplementation(
-    async (fn: (tx: typeof prismaMock) => Promise<unknown>) => fn(prismaMock)
-);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+prismaMock.$transaction.mockImplementation((fn: any) => fn(prismaMock));
 
 const commentService = await import("../src/services/commentService.js");
 
@@ -80,10 +79,8 @@ describe("Comment service: get comment by ID", () => {
 describe("Comment service: create comment", () => {
     beforeEach(() => {
         mockReset(prismaMock);
-        prismaMock.$transaction.mockImplementation(
-            async (fn: (tx: typeof prismaMock) => Promise<unknown>) =>
-                fn(prismaMock)
-        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        prismaMock.$transaction.mockImplementation((fn: any) => fn(prismaMock));
     });
 
     it("creates a comment and bumps post lastActivityAt", async () => {
@@ -208,7 +205,9 @@ const comment = {
 };
 
 describe("GET /api/posts/:postId/comments", () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
     it("returns 200 with list of comments", async () => {
         mockGetCommentsByPostId.mockResolvedValue([comment]);
@@ -231,7 +230,9 @@ describe("GET /api/posts/:postId/comments", () => {
 });
 
 describe("POST /api/posts/:postId/comments", () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
     it("returns 401 when not authenticated", async () => {
         const resp = await request(makeApp())
@@ -274,7 +275,9 @@ describe("POST /api/posts/:postId/comments", () => {
 });
 
 describe("DELETE /api/posts/:postId/comments/:commentId", () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
     it("returns 401 when not authenticated", async () => {
         const resp = await request(makeApp()).delete("/api/posts/1/comments/1");

@@ -193,7 +193,9 @@ function makeApp(authenticatedUserId?: number) {
 }
 
 describe("PUT /api/posts/:id/vote", () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
     it("returns 401 when not authenticated", async () => {
         const resp = await request(makeApp())
@@ -232,7 +234,9 @@ describe("PUT /api/posts/:id/vote", () => {
 });
 
 describe("DELETE /api/posts/:id/vote", () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
     it("returns 401 when not authenticated", async () => {
         const resp = await request(makeApp()).delete("/api/posts/1/vote");
@@ -263,7 +267,9 @@ describe("DELETE /api/posts/:id/vote", () => {
 });
 
 describe("PUT /api/posts/:postId/comments/:commentId/vote", () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
     it("returns 401 when not authenticated", async () => {
         const resp = await request(makeApp())
@@ -287,7 +293,9 @@ describe("PUT /api/posts/:postId/comments/:commentId/vote", () => {
 });
 
 describe("DELETE /api/posts/:postId/comments/:commentId/vote", () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
     it("returns 401 when not authenticated", async () => {
         const resp = await request(makeApp()).delete(
