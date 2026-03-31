@@ -213,6 +213,13 @@ const post = {
     authorId: 10,
     createdAt: new Date(),
     updatedAt: new Date(),
+    author: {
+        userId: 10,
+        username: "testuser",
+        email: "test@example.com",
+        password: "hashed",
+        createdAt: new Date(),
+    },
 };
 
 describe("GET /api/posts", () => {
