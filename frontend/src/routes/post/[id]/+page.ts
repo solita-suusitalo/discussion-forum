@@ -5,6 +5,10 @@ import { error } from "@sveltejs/kit";
 
 export const load: PageLoad = async ({ fetch, params }) => {
   const api = createApi(fetch);
+  const id = Number(params.id);
+  if (isNaN(id)) {
+    throw error(400, "Invalid post ID");
+  }
   try {
     const post = await api.get<Post>(`/posts/${params.id}`);
     return { post };

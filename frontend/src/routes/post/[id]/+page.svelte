@@ -1,5 +1,6 @@
 <script lang="ts">
   import { invalidateAll, goto } from "$app/navigation";
+  import { untrack } from "svelte";
   import { auth } from "$lib/auth.svelte";
   import { createApi, ApiError } from "$lib/api";
   import type { PageData } from "./$types";
@@ -12,8 +13,8 @@
 
   // ─── Edit state ─────────────────────────────────────────────────────────────
   let editing = $state(false);
-  let editTitle = $state(data.post.title);
-  let editContent = $state(data.post.content);
+  let editTitle = $state(untrack(() => data.post.title));
+  let editContent = $state(untrack(() => data.post.content));
   let editError = $state("");
   let saving = $state(false);
 

@@ -21,7 +21,7 @@ type RequestOptions = Omit<RequestInit, "body" | "method">;
 
 // createApi takes SvelteKit's fetch (or falls back to globalThis.fetch).
 // This is the pattern SvelteKit recommends: pass `fetch` from load() so the
-// framework can intercept it on the server (handles cookies, relative URLs, etc.).
+// framework can intercept it on the server (handles relative URLs, etc.).
 export function createApi(
   fetch: typeof globalThis.fetch = globalThis.fetch,
   token?: string,
@@ -43,7 +43,6 @@ export function createApi(
         ...authHeader,
         ...options.headers,
       },
-      credentials: "include", // send the session cookie the backend sets
       body: body !== undefined ? JSON.stringify(body) : undefined,
       ...options,
     });

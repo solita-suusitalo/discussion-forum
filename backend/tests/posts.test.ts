@@ -216,9 +216,6 @@ const post = {
     author: {
         userId: 10,
         username: "testuser",
-        email: "test@example.com",
-        password: "hashed",
-        createdAt: new Date(),
     },
 };
 

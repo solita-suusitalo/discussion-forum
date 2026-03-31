@@ -1,7 +1,13 @@
 import prisma from "../db.js";
 import type { Post, Prisma } from "../generated/prisma/client.js";
 
-const postWithAuthor = { include: { author: true } } as const;
+const postWithAuthor = {
+    include: {
+        author: {
+            select: { userId: true, username: true },
+        },
+    },
+} as const;
 export type PostWithAuthor = Prisma.PostGetPayload<typeof postWithAuthor>;
 
 export async function getAllPosts(): Promise<PostWithAuthor[]> {
