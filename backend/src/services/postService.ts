@@ -1,32 +1,50 @@
 import prisma from "../db.js";
 import type { Post, Prisma } from "../generated/prisma/client.js";
 
-const postWithAuthor = {
+// Lightweight shape used in the posts list
+const postSummaryInclude = {
     include: {
-        author: {
-            select: { userId: true, username: true },
-        },
+        author: { select: { userId: true, username: true } },
+        _count: { select: { comments: true } },
     },
 } as const;
-export type PostWithAuthor = Prisma.PostGetPayload<typeof postWithAuthor>;
+export type PostSummary = Prisma.PostGetPayload<typeof postSummaryInclude>;
 
-export async function getAllPosts(): Promise<PostWithAuthor[]> {
-    return prisma.post.findMany(postWithAuthor);
+// Full shape used in the single-post detail view
+const postDetailInclude = {
+    include: {
+        author: { select: { userId: true, username: true } },
+        _count: { select: { comments: true } },
+        comments: {
+            include: {
+                author: { select: { userId: true, username: true } },
+                votes: { select: { userId: true, value: true } },
+            },
+            orderBy: { createdAt: "asc" as const },
+        },
+        votes: { select: { userId: true, value: true } },
+    },
+} as const;
+export type PostDetail = Prisma.PostGetPayload<typeof postDetailInclude>;
+
+export async function getAllPosts(): Promise<PostSummary[]> {
+    return prisma.post.findMany({
+        ...postSummaryInclude,
+        orderBy: { lastActivityAt: "desc" },
+    });
 }
 
-export async function getPostById(id: number): Promise<PostWithAuthor | null> {
+export async function getPostById(id: number): Promise<PostDetail | null> {
     return prisma.post.findUnique({
         where: { postId: id },
-        ...postWithAuthor,
+        ...postDetailInclude,
     });
 }
 
 export async function createPost(
-    data: Omit<Post, "postId" | "createdAt" | "updatedAt">
+    data: Omit<Post, "postId" | "createdAt" | "updatedAt" | "lastActivityAt">
 ): Promise<Post> {
-    return prisma.post.create({
-        data,
-    });
+    return prisma.post.create({ data });
 }
 
 export async function updatePost(

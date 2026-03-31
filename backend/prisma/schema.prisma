@@ -13,20 +13,57 @@ datasource db {
 }
 
 model User {
-  userId    Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String   @unique
-  password  String // need to hash
-  posts     Post[]
-  createdAt DateTime @default(now())
+  userId       Int           @id @default(autoincrement())
+  email        String        @unique
+  username     String        @unique
+  password     String // need to hash
+  posts        Post[]
+  comments     Comment[]
+  postVotes    PostVote[]
+  commentVotes CommentVote[]
+  createdAt    DateTime      @default(now())
 }
 
 model Post {
-  postId    Int      @id @default(autoincrement())
-  title     String
+  postId         Int        @id @default(autoincrement())
+  title          String
+  content        String
+  authorId       Int
+  author         User       @relation(fields: [authorId], references: [userId])
+  comments       Comment[]
+  votes          PostVote[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  lastActivityAt DateTime   @default(now())
+}
+
+model Comment {
+  commentId Int           @id @default(autoincrement())
   content   String
+  postId    Int
+  post      Post          @relation(fields: [postId], references: [postId])
   authorId  Int
-  author    User     @relation(fields: [authorId], references: [userId])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  author    User          @relation(fields: [authorId], references: [userId])
+  votes     CommentVote[]
+  createdAt DateTime      @default(now())
+}
+
+model PostVote {
+  userId Int
+  postId Int
+  value  Int
+  user   User @relation(fields: [userId], references: [userId])
+  post   Post @relation(fields: [postId], references: [postId])
+
+  @@id([userId, postId])
+}
+
+model CommentVote {
+  userId    Int
+  commentId Int
+  value     Int
+  user      User    @relation(fields: [userId], references: [userId])
+  comment   Comment @relation(fields: [commentId], references: [commentId])
+
+  @@id([userId, commentId])
 }

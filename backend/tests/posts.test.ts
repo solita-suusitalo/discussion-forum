@@ -37,6 +37,7 @@ const mockPost = {
     authorId: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
+    lastActivityAt: new Date(),
 };
 
 describe("Post service: list posts", () => {
@@ -213,10 +214,11 @@ const post = {
     authorId: 10,
     createdAt: new Date(),
     updatedAt: new Date(),
-    author: {
-        userId: 10,
-        username: "testuser",
-    },
+    lastActivityAt: new Date(),
+    author: { userId: 10, username: "testuser" },
+    _count: { comments: 0 },
+    comments: [],
+    votes: [],
 };
 
 describe("GET /api/posts", () => {
@@ -332,7 +334,7 @@ describe("PUT /api/posts/:id", () => {
     });
 
     it("returns 200 with updated post when author updates own post", async () => {
-        mockGetPostById.mockResolvedValue(post); // authorId: 10
+        mockGetPostById.mockResolvedValue(post); // authorId: 10, _count.comments: 0
         mockUpdatePost.mockResolvedValue({ ...post, title: "Updated" });
 
         const resp = await request(makeApp(10))
@@ -341,6 +343,31 @@ describe("PUT /api/posts/:id", () => {
 
         expect(resp.status).toBe(200);
         expect(resp.body.title).toBe("Updated");
+    });
+
+    it("returns 409 when renaming a topic that already has comments", async () => {
+        mockGetPostById.mockResolvedValue({ ...post, _count: { comments: 3 } });
+
+        const resp = await request(makeApp(10))
+            .put("/api/posts/1")
+            .send({ title: "New Title" });
+
+        expect(resp.status).toBe(409);
+        expect(resp.body.error).toMatch(/rename/i);
+    });
+
+    it("returns 200 when updating only content on a topic with comments", async () => {
+        mockGetPostById.mockResolvedValue({ ...post, _count: { comments: 3 } });
+        mockUpdatePost.mockResolvedValue({
+            ...post,
+            content: "updated content",
+        });
+
+        const resp = await request(makeApp(10))
+            .put("/api/posts/1")
+            .send({ content: "updated content" });
+
+        expect(resp.status).toBe(200);
     });
 });
 

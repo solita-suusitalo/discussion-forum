@@ -68,6 +68,13 @@ export async function update(req: Request<{ id: string }>, res: Response) {
         }
 
         const body = req.body;
+        if (body.title !== undefined && existing._count.comments > 0) {
+            res.status(409).json({
+                error: "Cannot rename a topic that has messages",
+            });
+            return;
+        }
+
         const post = await postService.updatePost(id, body);
         res.json(post);
     } catch (error) {
