@@ -4,6 +4,7 @@ export interface Post {
   title: string;
   content: string;
   authorId: number;
+  author: { username: string };
   createdAt: string; // ISO date string over JSON
   updatedAt: string;
 }

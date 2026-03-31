@@ -1,10 +1,14 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import favicon from "$lib/assets/favicon.svg";
   import "../lib/styles/app.scss";
+  import { auth } from "$lib/auth.svelte";
 
-  // $props() is Svelte 5 runes syntax — every layout/component receives its
-  // props this way instead of the old `export let` pattern.
   let { children } = $props();
+
+  onMount(() => {
+    auth.init();
+  });
 </script>
 
 <svelte:head>
@@ -18,10 +22,31 @@
     <a href="/" class="site-header__logo">Forum</a>
 
     <nav class="site-nav">
-      <a href="/" class="site-nav__link">Home</a>
-      <!-- Auth links will be conditionally shown once we add auth in Step 4 -->
-      <a href="/login" class="site-nav__link">Login</a>
-      <a href="/register" class="site-nav__link btn btn--primary">Register</a>
+      {#if auth.current}
+        <a
+          href="/profile"
+          class="site-nav__link site-nav__profile"
+          aria-label="Profile"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><circle cx="12" cy="8" r="4" /><path
+              d="M4 20c0-4 3.6-7 8-7s8 3 8 7"
+            /></svg
+          >
+          <span>{auth.current.username}</span>
+        </a>
+      {:else}
+        <a href="/login" class="site-nav__link">Login</a>
+      {/if}
     </nav>
   </div>
 </header>
@@ -74,11 +99,23 @@
       font-size: var(--text-sm);
       font-weight: 500;
       color: var(--color-text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
 
       &:hover {
         color: var(--color-text);
         text-decoration: none;
       }
+    }
+
+    &__profile {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      color: var(--color-text);
     }
   }
 

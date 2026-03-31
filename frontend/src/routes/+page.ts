@@ -10,11 +10,11 @@ export const load: PageLoad = async ({ fetch }) => {
   const posts = await api.get<Post[]>("/posts");
   return {
     summaries: posts.map((post) => ({
+      id: post.postId,
       title: post.title,
       content: post.content,
-      author: post.authorId,
-      created: post.createdAt,
-      updated: post.updatedAt,
+      author: post.author.username,
+      createdAt: post.createdAt,
     })),
   };
 };
