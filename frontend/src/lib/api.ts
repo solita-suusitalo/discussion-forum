@@ -73,6 +73,34 @@ export function createApi(
       request<T>("PUT", path, body, options),
     delete: <T>(path: string, options?: RequestOptions) =>
       request<T>("DELETE", path, undefined, options),
+
+    // ── Comments ──────────────────────────────────────────────────────────────
+    getComments: (postId: number) =>
+      request<import("./types").Comment[]>("GET", `/posts/${postId}/comments`),
+    createComment: (postId: number, content: string) =>
+      request<import("./types").Comment>("POST", `/posts/${postId}/comments`, {
+        content,
+      }),
+    deleteComment: (postId: number, commentId: number) =>
+      request<void>("DELETE", `/posts/${postId}/comments/${commentId}`),
+
+    // ── Votes ─────────────────────────────────────────────────────────────────
+    votePost: (postId: number, value: 1 | -1) =>
+      request<{ userId: number; postId: number; value: number }>(
+        "PUT",
+        `/posts/${postId}/vote`,
+        { value }
+      ),
+    removePostVote: (postId: number) =>
+      request<void>("DELETE", `/posts/${postId}/vote`),
+    voteComment: (postId: number, commentId: number, value: 1 | -1) =>
+      request<{ userId: number; commentId: number; value: number }>(
+        "PUT",
+        `/posts/${postId}/comments/${commentId}/vote`,
+        { value }
+      ),
+    removeCommentVote: (postId: number, commentId: number) =>
+      request<void>("DELETE", `/posts/${postId}/comments/${commentId}/vote`),
   };
 }
 

@@ -1,13 +1,10 @@
 import { createApi } from "$lib/api";
-import type { Post } from "$lib/types";
+import type { PostSummary } from "$lib/types";
 import type { PageLoad } from "./$types";
 
-// SvelteKit passes a `fetch` argument to every load function.
-// This is a special version of fetch that knows about the current request
-// (cookies, server-side context). Always use it instead of globalThis.fetch.
 export const load: PageLoad = async ({ fetch }) => {
   const api = createApi(fetch);
-  const posts = await api.get<Post[]>("/posts");
+  const posts = await api.get<PostSummary[]>("/posts");
   return {
     summaries: posts.map((post) => ({
       id: post.postId,
@@ -15,6 +12,7 @@ export const load: PageLoad = async ({ fetch }) => {
       content: post.content,
       author: post.author.username,
       createdAt: post.createdAt,
+      commentCount: post._count.comments,
     })),
   };
 };
