@@ -12,10 +12,15 @@
  * The base URL is read from the PUBLIC_API_URL env variable so it works in
  * both development (http://localhost:3000) and production (Azure container URL).
  * SvelteKit exposes PUBLIC_* variables to both server and client code.
+ * Using dynamic/public so the URL is resolved at runtime, not baked in at
+ * build time — required for containerised deployments where the value differs
+ * per environment and is injected via Docker/Azure env vars.
  */
-import { PUBLIC_API_URL } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 
-const BASE = `${PUBLIC_API_URL}/api`;
+const BASE = env.PUBLIC_API_URL
+  ? `${env.PUBLIC_API_URL}/api`
+  : "http://localhost:3000/api";
 
 type RequestOptions = Omit<RequestInit, "body" | "method">;
 
@@ -24,7 +29,7 @@ type RequestOptions = Omit<RequestInit, "body" | "method">;
 // framework can intercept it on the server (handles relative URLs, etc.).
 export function createApi(
   fetch: typeof globalThis.fetch = globalThis.fetch,
-  token?: string,
+  token?: string
 ) {
   const authHeader: Record<string, string> = token
     ? { Authorization: `Bearer ${token}` }
@@ -34,7 +39,7 @@ export function createApi(
     method: string,
     path: string,
     body?: unknown,
-    options: RequestOptions = {},
+    options: RequestOptions = {}
   ): Promise<T> {
     const res = await fetch(`${BASE}${path}`, {
       method,
@@ -75,7 +80,7 @@ export function createApi(
 export class ApiError extends Error {
   constructor(
     message: string,
-    public readonly status: number,
+    public readonly status: number
   ) {
     super(message);
     this.name = "ApiError";
