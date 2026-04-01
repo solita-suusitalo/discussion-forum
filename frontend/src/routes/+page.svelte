@@ -84,11 +84,16 @@
 
 {#each data.summaries as post (post.id)}
   <a href="/post/{post.id}" class="post-card">
-    <h2 class="post-card__title">{post.title}</h2>
+    <div class="post-card__header">
+      <h2 class="post-card__title">{post.title}</h2>
+      <span class="post-card__date">{formatDate(post.createdAt)}</span>
+    </div>
     <p class="post-card__preview">{preview(post.content)}</p>
     <footer class="post-card__meta">
-      <span>{post.author}</span>
-      <span>{formatDate(post.createdAt)}</span>
+      <span class="post-card__author">{post.author}</span>
+      <span class="post-card__replies">
+        {post.commentCount === 1 ? "1 reply" : `${post.commentCount} replies`}
+      </span>
     </footer>
   </a>
 {:else}
@@ -146,25 +151,51 @@
       border-color: var(--color-primary);
     }
 
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-3);
+      margin-bottom: var(--space-2);
+    }
+
     &__title {
       font-size: var(--text-xl);
       font-weight: 600;
       color: var(--color-primary);
-      margin-bottom: var(--space-2);
+    }
+
+    &__date {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     &__preview {
       color: var(--color-text-muted);
       font-size: var(--text-base);
       line-height: 1.6;
+      overflow-wrap: break-word;
+      word-break: break-word;
       margin-bottom: var(--space-4);
     }
 
     &__meta {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: var(--text-sm);
       color: var(--color-text-muted);
+    }
+
+    &__author {
+      color: var(--color-text-muted);
+    }
+
+    &__replies {
+      font-weight: 500;
+      color: var(--color-primary);
     }
   }
 
