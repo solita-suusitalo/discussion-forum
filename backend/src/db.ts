@@ -9,8 +9,17 @@ if (!DATABASE_URL) {
 
 // Create one shared PrismaClient instance for the whole app.
 // Re-using a single instance avoids opening a new DB connection pool on every request.
+
 const prisma = new PrismaClient({
     adapter: new PrismaPg({ connectionString: DATABASE_URL }),
 });
+
+try {
+    await prisma.$connect();
+    console.log("Connected to the database successfully.");
+} catch (error) {
+    console.error("Failed to connect to the database:", error);
+    process.exit(1);
+}
 
 export default prisma;
