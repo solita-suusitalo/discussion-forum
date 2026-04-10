@@ -8,7 +8,7 @@
     "prisma:generate": "prisma generate",
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/src/server.js",
+    "start": "node dist/server.js",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
