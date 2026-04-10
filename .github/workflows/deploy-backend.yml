@@ -94,6 +94,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: "santeri-discussion-forum-backend"
-          slot-name: "Production"
           package: backend
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F282645F4971494D985B600F9E0B1214 }}
