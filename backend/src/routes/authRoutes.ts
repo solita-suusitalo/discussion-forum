@@ -9,6 +9,7 @@ const router = Router();
 const loginRateLimit = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 15,
+    validate: { xForwardedForHeader: false },
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: "Too many login attempts, please try again later" },
