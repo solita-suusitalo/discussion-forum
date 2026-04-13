@@ -55,5 +55,5 @@ jobs:
         with:
           app-name: "santeri-disc-forum-backend"
           slot-name: "Production"
-          package: backend
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C1941E17DEBB4BDB959940892C49E731 }}
