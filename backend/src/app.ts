@@ -9,6 +9,8 @@ import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 // credentials: true is required so the browser accepts Set-Cookie from the API.
 // origin must be an explicit URL (not '*') when credentials are involved.
 app.use(
