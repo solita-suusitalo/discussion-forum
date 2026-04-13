@@ -189,6 +189,30 @@
       minute: "2-digit",
     });
   }
+
+  const AVATAR_COLORS = [
+    "#7c6faa",
+    "#5b8fa8",
+    "#a8826b",
+    "#6b9e7a",
+    "#a87a9e",
+    "#7a8ea8",
+    "#9e8a5b",
+    "#6b8ea8",
+  ];
+
+  function avatarColor(name: string): string {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++)
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return (
+      AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length] ?? AVATAR_COLORS[0]!
+    );
+  }
+
+  function initials(name: string): string {
+    return name.slice(0, 2).toUpperCase();
+  }
 </script>
 
 <article class="post">
@@ -211,7 +235,14 @@
       <h1 class="post__title">{data.post.title}</h1>
     {/if}
     <div class="post__meta">
-      <span>{data.post.author.username}</span>
+      <div
+        class="post__author-avatar"
+        style="background: {avatarColor(data.post.author.username)}"
+        aria-hidden="true"
+      >
+        {initials(data.post.author.username)}
+      </div>
+      <span class="post__meta-author">{data.post.author.username}</span>
       <span>Posted {formatDate(data.post.createdAt)}</span>
       {#if data.post.updatedAt !== data.post.createdAt}
         <span>Edited {formatDate(data.post.updatedAt)}</span>
@@ -310,66 +341,109 @@
 
 <!-- ── Comments section ──────────────────────────────────────────────────── -->
 <section class="comments">
-  <h2 class="comments__heading">
-    {comments.length === 0
-      ? "No replies yet"
-      : `${comments.length} ${comments.length === 1 ? "Reply" : "Replies"}`}
-  </h2>
+  <header class="comments__header">
+    <h2 class="comments__heading">
+      {comments.length === 0
+        ? "No replies yet"
+        : `${comments.length} ${comments.length === 1 ? "reply" : "replies"}`}
+    </h2>
+  </header>
 
-  {#each comments as comment (comment.commentId)}
-    <div class="comment">
-      <header class="comment__meta">
-        <span class="comment__author">{comment.author.username}</span>
-        <span class="comment__date">{formatDate(comment.createdAt)}</span>
-      </header>
-      <p class="comment__text">{comment.content}</p>
-      <footer class="comment__footer">
-        <div
-          class="vote-pill vote-pill--sm"
-          class:vote-pill--up-active={commentUserVote(comment.commentId) === 1}
-          class:vote-pill--down-active={commentUserVote(comment.commentId) ===
-            -1}
-        >
-          <button
-            class="vote-pill__btn vote-pill__btn--up"
-            disabled={!auth.current || auth.current.userId === comment.authorId}
-            onclick={() => handleCommentVote(comment.commentId, 1)}
-            aria-label="Upvote comment"
-            aria-pressed={commentUserVote(comment.commentId) === 1}>▲</button
-          >
-          <span
-            class="vote-pill__score"
-            class:vote-pill__score--pos={commentScore(comment.commentId) > 0}
-            class:vote-pill__score--neg={commentScore(comment.commentId) < 0}
-            >{commentScore(comment.commentId)}</span
-          >
-          <button
-            class="vote-pill__btn vote-pill__btn--down"
-            disabled={!auth.current || auth.current.userId === comment.authorId}
-            onclick={() => handleCommentVote(comment.commentId, -1)}
-            aria-label="Downvote comment"
-            aria-pressed={commentUserVote(comment.commentId) === -1}>▼</button
-          >
+  {#if comments.length > 0}
+    <div class="feed">
+      <div class="feed__line"></div>
+
+      {#each comments as comment, i (comment.commentId)}
+        <div class="bubble" style="animation-delay: {i * 70}ms">
+          <div
+            class="bubble__node"
+            class:bubble__node--up={commentUserVote(comment.commentId) === 1}
+            class:bubble__node--down={commentUserVote(comment.commentId) === -1}
+          ></div>
+          <div class="bubble__card">
+            <div
+              class="bubble__avatar"
+              style="background: {avatarColor(comment.author.username)}"
+              aria-hidden="true"
+            >
+              {initials(comment.author.username)}
+            </div>
+            <div class="bubble__body">
+              <div class="bubble__header">
+                <span class="bubble__author">{comment.author.username}</span>
+                <time class="bubble__date" datetime={comment.createdAt}>
+                  {formatDate(comment.createdAt)}
+                </time>
+              </div>
+              <p class="bubble__text">{comment.content}</p>
+              <footer class="bubble__footer">
+                <div
+                  class="vote-pill vote-pill--sm"
+                  class:vote-pill--up-active={commentUserVote(
+                    comment.commentId
+                  ) === 1}
+                  class:vote-pill--down-active={commentUserVote(
+                    comment.commentId
+                  ) === -1}
+                >
+                  <button
+                    class="vote-pill__btn vote-pill__btn--up"
+                    disabled={!auth.current ||
+                      auth.current.userId === comment.authorId}
+                    onclick={() => handleCommentVote(comment.commentId, 1)}
+                    aria-label="Upvote comment"
+                    aria-pressed={commentUserVote(comment.commentId) === 1}
+                    >▲</button
+                  >
+                  <span
+                    class="vote-pill__score"
+                    class:vote-pill__score--pos={commentScore(
+                      comment.commentId
+                    ) > 0}
+                    class:vote-pill__score--neg={commentScore(
+                      comment.commentId
+                    ) < 0}>{commentScore(comment.commentId)}</span
+                  >
+                  <button
+                    class="vote-pill__btn vote-pill__btn--down"
+                    disabled={!auth.current ||
+                      auth.current.userId === comment.authorId}
+                    onclick={() => handleCommentVote(comment.commentId, -1)}
+                    aria-label="Downvote comment"
+                    aria-pressed={commentUserVote(comment.commentId) === -1}
+                    >▼</button
+                  >
+                </div>
+                {#if auth.current?.userId === comment.authorId}
+                  <button
+                    class="bubble__delete"
+                    onclick={() => handleDeleteComment(comment.commentId)}
+                    aria-label="Delete comment">Delete</button
+                  >
+                {/if}
+              </footer>
+            </div>
+          </div>
         </div>
-        {#if auth.current?.userId === comment.authorId}
-          <button
-            class="comment__delete"
-            onclick={() => handleDeleteComment(comment.commentId)}
-            aria-label="Delete comment">Delete</button
-          >
-        {/if}
-      </footer>
+      {/each}
     </div>
-  {/each}
+  {/if}
 
   {#if auth.current}
-    <form class="comment-form" onsubmit={handleComment}>
+    <form class="reply-form" onsubmit={handleComment}>
       {#if commentError}
         <div class="alert alert--error">{commentError}</div>
       {/if}
-      <div class="form-group">
-        <label for="comment-text">Add a reply</label>
+      <div class="reply-form__input-row">
+        <div
+          class="reply-form__avatar"
+          style="background: {avatarColor(auth.current.username)}"
+          aria-hidden="true"
+        >
+          {initials(auth.current.username)}
+        </div>
         <textarea
+          class="reply-form__textarea"
           id="comment-text"
           bind:value={commentText}
           required
@@ -377,13 +451,14 @@
           placeholder="Write a reply…"
         ></textarea>
       </div>
-      <button
-        type="submit"
-        class="btn btn--primary"
-        disabled={submittingComment}
-      >
-        {submittingComment ? "Posting…" : "Post Reply"}
-      </button>
+      <div class="reply-form__actions">
+        <button
+          type="submit"
+          class="reply-form__submit"
+          disabled={submittingComment}
+          >{submittingComment ? "Posting…" : "Post reply"}</button
+        >
+      </div>
     </form>
   {:else}
     <p class="comments__login-prompt">
@@ -415,9 +490,30 @@
 
     &__meta {
       display: flex;
-      gap: var(--space-4);
+      align-items: center;
+      gap: var(--space-3);
       font-size: var(--text-sm);
       color: var(--color-text-muted);
+    }
+
+    &__author-avatar {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.9);
+      letter-spacing: 0.04em;
+      user-select: none;
+    }
+
+    &__meta-author {
+      font-weight: 600;
+      color: var(--color-text);
     }
 
     &__content {
@@ -605,19 +701,26 @@
   // ── Comments ─────────────────────────────────────────────────────────────────
   .comments {
     margin-top: var(--space-8);
+    margin-bottom: var(--space-7);
 
-    &__heading {
-      font-size: var(--text-xl);
-      font-weight: 600;
+    &__header {
       margin-bottom: var(--space-5);
       padding-bottom: var(--space-3);
       border-bottom: 1px solid var(--color-border);
+    }
+
+    &__heading {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 600;
+      color: var(--color-text);
     }
 
     &__login-prompt {
       font-size: var(--text-sm);
       color: var(--color-text-muted);
       margin-top: var(--space-5);
+      padding-left: 48px;
 
       a {
         color: var(--color-primary);
@@ -625,27 +728,126 @@
     }
   }
 
-  .comment {
-    padding: var(--space-4) 0;
-    border-bottom: 1px solid var(--color-border);
+  // ── Timeline feed ────────────────────────────────────────────────────────────
+  .feed {
+    position: relative;
+    padding-left: 48px;
 
-    &__meta {
+    &__line {
+      position: absolute;
+      left: 16px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        var(--color-border) 6%,
+        var(--color-border) 94%,
+        transparent
+      );
+      pointer-events: none;
+    }
+  }
+
+  // ── Comment bubble ───────────────────────────────────────────────────────────
+  .bubble {
+    position: relative;
+    padding-bottom: var(--space-4);
+    opacity: 0;
+    animation: bubble-in 320ms ease forwards;
+
+    &__node {
+      position: absolute;
+      left: -38px;
+      top: 14px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-surface-2);
+      border: 2px solid var(--color-border);
+      transition:
+        background var(--t-fast),
+        border-color var(--t-fast),
+        box-shadow var(--t-fast);
+      z-index: 1;
+
+      &--up {
+        background: var(--color-primary-dim);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 8px rgba(201, 161, 74, 0.35);
+      }
+
+      &--down {
+        background: rgba(217, 95, 75, 0.12);
+        border-color: var(--color-danger);
+        box-shadow: 0 0 8px rgba(217, 95, 75, 0.25);
+      }
+    }
+
+    &__card {
+      display: flex;
+      gap: var(--space-3);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      transition:
+        border-color var(--t-fast),
+        box-shadow var(--t-fast);
+
+      &:hover {
+        border-color: rgba(201, 161, 74, 0.2);
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+      }
+    }
+
+    &__avatar {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
+      justify-content: center;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.9);
+      letter-spacing: 0.04em;
+      user-select: none;
+    }
+
+    &__body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    &__header {
+      display: flex;
+      align-items: baseline;
       gap: var(--space-3);
       margin-bottom: var(--space-2);
-      font-size: var(--text-sm);
-      color: var(--color-text-muted);
+      flex-wrap: wrap;
     }
 
     &__author {
-      font-weight: 600;
+      font-size: var(--text-sm);
+      font-weight: 700;
       color: var(--color-text);
     }
 
+    &__date {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-primary);
+      opacity: 0.8;
+      letter-spacing: 0.02em;
+    }
+
     &__text {
-      font-size: var(--text-base);
-      line-height: 1.65;
+      font-size: var(--text-sm);
+      line-height: 1.7;
+      color: var(--color-text);
       white-space: pre-wrap;
       overflow-wrap: break-word;
       word-break: break-word;
@@ -655,8 +857,7 @@
     &__footer {
       display: flex;
       align-items: center;
-      gap: var(--space-4);
-      margin-top: var(--space-3);
+      gap: var(--space-3);
     }
 
     &__delete {
@@ -664,10 +865,11 @@
       border: none;
       padding: 0;
       cursor: pointer;
-      color: var(--color-text-muted);
+      font-family: var(--font-sans);
       font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      opacity: 0.4;
       letter-spacing: 0.04em;
-      opacity: 0.5;
 
       &:hover {
         color: var(--color-danger);
@@ -676,11 +878,98 @@
     }
   }
 
-  .comment-form {
-    margin-top: var(--space-6);
-    margin-bottom: var(--space-7);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+  // ── Reply form ───────────────────────────────────────────────────────────────
+  .reply-form {
+    margin-top: var(--space-5);
+    padding-left: 48px;
+
+    &__input-row {
+      display: flex;
+      gap: var(--space-3);
+      align-items: flex-start;
+    }
+
+    &__avatar {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.9);
+      letter-spacing: 0.04em;
+      user-select: none;
+      margin-top: 2px;
+    }
+
+    &__textarea {
+      flex: 1;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-3) var(--space-4);
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      color: var(--color-text);
+      resize: none;
+      outline: none;
+      line-height: 1.6;
+      transition:
+        border-color var(--t-fast),
+        box-shadow var(--t-fast);
+
+      &::placeholder {
+        color: var(--color-text-muted);
+        opacity: 0.4;
+      }
+
+      &:focus {
+        border-color: var(--color-primary);
+        box-shadow: var(--shadow-focus);
+      }
+    }
+
+    &__actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: var(--space-3);
+    }
+
+    &__submit {
+      padding: 7px 20px;
+      background: var(--color-primary);
+      color: var(--color-bg);
+      border: none;
+      border-radius: var(--radius-full);
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition:
+        background var(--t-fast),
+        opacity var(--t-fast);
+
+      &:hover {
+        background: var(--color-primary-dark);
+      }
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  @keyframes bubble-in {
+    from {
+      opacity: 0;
+      transform: translateX(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 </style>
