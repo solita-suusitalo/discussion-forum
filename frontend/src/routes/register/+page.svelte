@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createApi, ApiError } from "$lib/api";
   import { goto } from "$app/navigation";
+  import { auth } from "$lib/auth.svelte";
 
   let email = $state("");
   let username = $state("");
@@ -15,7 +16,12 @@
     try {
       const api = createApi();
       await api.post("/users", { email, username, password });
-      goto("/login");
+      const { token } = await api.post<{ token: string }>("/auth/login", {
+        email,
+        password,
+      });
+      auth.login(token);
+      goto("/");
     } catch (err) {
       error = err instanceof ApiError ? err.message : "Something went wrong";
     } finally {

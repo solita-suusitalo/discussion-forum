@@ -191,8 +191,6 @@
   }
 </script>
 
-<a href="/" class="back-link">&larr; Back to discussions</a>
-
 <article class="post">
   <header class="post__header">
     {#if editing}
@@ -250,25 +248,29 @@
   {/if}
 
   <!-- Post vote widget -->
-  <div class="vote-bar">
+  <div
+    class="vote-pill"
+    class:vote-pill--up-active={postUserVote === 1}
+    class:vote-pill--down-active={postUserVote === -1}
+  >
     <button
-      class="vote-btn vote-btn--up"
-      class:vote-btn--active={postUserVote === 1}
+      class="vote-pill__btn vote-pill__btn--up"
       disabled={!auth.current || auth.current.userId === data.post.authorId}
       onclick={() => handlePostVote(1)}
-      aria-label="Upvote">👍</button
+      aria-label="Upvote"
+      aria-pressed={postUserVote === 1}>▲</button
     >
     <span
-      class="vote-score"
-      class:vote-score--pos={postScore > 0}
-      class:vote-score--neg={postScore < 0}>{postScore}</span
+      class="vote-pill__score"
+      class:vote-pill__score--pos={postScore > 0}
+      class:vote-pill__score--neg={postScore < 0}>{postScore}</span
     >
     <button
-      class="vote-btn vote-btn--down"
-      class:vote-btn--active={postUserVote === -1}
+      class="vote-pill__btn vote-pill__btn--down"
       disabled={!auth.current || auth.current.userId === data.post.authorId}
       onclick={() => handlePostVote(-1)}
-      aria-label="Downvote">👎</button
+      aria-label="Downvote"
+      aria-pressed={postUserVote === -1}>▼</button
     >
   </div>
 
@@ -316,42 +318,47 @@
 
   {#each comments as comment (comment.commentId)}
     <div class="comment">
-      <div class="comment__vote">
-        <button
-          class="vote-btn vote-btn--sm vote-btn--up"
-          class:vote-btn--active={commentUserVote(comment.commentId) === 1}
-          disabled={!auth.current || auth.current.userId === comment.authorId}
-          onclick={() => handleCommentVote(comment.commentId, 1)}
-          aria-label="Upvote comment">👍</button
+      <header class="comment__meta">
+        <span class="comment__author">{comment.author.username}</span>
+        <span class="comment__date">{formatDate(comment.createdAt)}</span>
+      </header>
+      <p class="comment__text">{comment.content}</p>
+      <footer class="comment__footer">
+        <div
+          class="vote-pill vote-pill--sm"
+          class:vote-pill--up-active={commentUserVote(comment.commentId) === 1}
+          class:vote-pill--down-active={commentUserVote(comment.commentId) ===
+            -1}
         >
-        <span
-          class="vote-score"
-          class:vote-score--pos={commentScore(comment.commentId) > 0}
-          class:vote-score--neg={commentScore(comment.commentId) < 0}
-          >{commentScore(comment.commentId)}</span
-        >
-        <button
-          class="vote-btn vote-btn--sm vote-btn--down"
-          class:vote-btn--active={commentUserVote(comment.commentId) === -1}
-          disabled={!auth.current || auth.current.userId === comment.authorId}
-          onclick={() => handleCommentVote(comment.commentId, -1)}
-          aria-label="Downvote comment">👎</button
-        >
-      </div>
-      <div class="comment__body">
-        <div class="comment__meta">
-          <span class="comment__author">{comment.author.username}</span>
-          <span class="comment__date">{formatDate(comment.createdAt)}</span>
-          {#if auth.current?.userId === comment.authorId}
-            <button
-              class="comment__delete"
-              onclick={() => handleDeleteComment(comment.commentId)}
-              aria-label="Delete comment">Delete</button
-            >
-          {/if}
+          <button
+            class="vote-pill__btn vote-pill__btn--up"
+            disabled={!auth.current || auth.current.userId === comment.authorId}
+            onclick={() => handleCommentVote(comment.commentId, 1)}
+            aria-label="Upvote comment"
+            aria-pressed={commentUserVote(comment.commentId) === 1}>▲</button
+          >
+          <span
+            class="vote-pill__score"
+            class:vote-pill__score--pos={commentScore(comment.commentId) > 0}
+            class:vote-pill__score--neg={commentScore(comment.commentId) < 0}
+            >{commentScore(comment.commentId)}</span
+          >
+          <button
+            class="vote-pill__btn vote-pill__btn--down"
+            disabled={!auth.current || auth.current.userId === comment.authorId}
+            onclick={() => handleCommentVote(comment.commentId, -1)}
+            aria-label="Downvote comment"
+            aria-pressed={commentUserVote(comment.commentId) === -1}>▼</button
+          >
         </div>
-        <p class="comment__text">{comment.content}</p>
-      </div>
+        {#if auth.current?.userId === comment.authorId}
+          <button
+            class="comment__delete"
+            onclick={() => handleDeleteComment(comment.commentId)}
+            aria-label="Delete comment">Delete</button
+          >
+        {/if}
+      </footer>
     </div>
   {/each}
 
@@ -386,19 +393,8 @@
 </section>
 
 <style lang="scss">
-  .back-link {
-    display: inline-block;
-    margin-bottom: var(--space-5);
-    font-size: var(--text-sm);
-    color: var(--color-primary);
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
   .post {
+    margin-top: var(--space-7);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -494,65 +490,115 @@
     }
   }
 
-  // ── Vote widget ──────────────────────────────────────────────────────────────
-  .vote-bar {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
+  // ── Vote pill ─────────────────────────────────────────────────────────────────
+  .vote-pill {
+    display: inline-flex;
+    align-items: stretch;
     margin-top: var(--space-5);
-  }
-
-  .vote-btn {
-    background: none;
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    padding: var(--space-1) var(--space-2);
-    cursor: pointer;
-    color: var(--color-text-muted);
-    font-size: var(--text-sm);
-    line-height: 1;
-    transition:
-      color 100ms,
-      border-color 100ms;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    background: var(--color-surface);
 
-    &:hover:not(:disabled) {
+    &__btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      padding: 7px 16px;
+      font-size: 11px;
+      line-height: 1;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition:
+        background var(--t-fast),
+        color var(--t-fast);
+
+      &--up {
+        border-right: 1px solid transparent;
+        transition:
+          background var(--t-fast),
+          color var(--t-fast),
+          border-color var(--t-fast);
+
+        &:hover:not(:disabled) {
+          background: var(--color-primary-dim);
+          color: var(--color-primary);
+        }
+      }
+
+      &--down {
+        border-left: 1px solid transparent;
+        transition:
+          background var(--t-fast),
+          color var(--t-fast),
+          border-color var(--t-fast);
+
+        &:hover:not(:disabled) {
+          background: rgba(217, 95, 75, 0.1);
+          color: var(--color-danger);
+        }
+      }
+
+      &:disabled {
+        opacity: 0.3;
+        cursor: default;
+      }
+    }
+
+    // Internal dividers appear when hovering the pill
+    &:hover &__btn--up {
+      border-right-color: var(--color-border);
+    }
+    &:hover &__btn--down {
+      border-left-color: var(--color-border);
+    }
+
+    &__score {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 12px;
+      min-width: 2.5rem;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-text-muted);
+      letter-spacing: 0.02em;
+      user-select: none;
+
+      &--pos {
+        color: var(--color-primary);
+      }
+      &--neg {
+        color: var(--color-danger);
+      }
+    }
+
+    // Active states — button tinted when vote is cast
+    &--up-active &__btn--up {
       color: var(--color-primary);
-      border-color: var(--color-primary);
+      background: var(--color-primary-dim);
+      border-right-color: var(--color-border);
     }
 
-    &--up#{&}--active {
-      color: #16a34a;
-      border-color: #16a34a;
-    }
-
-    &--down#{&}--active {
+    &--down-active &__btn--down {
       color: var(--color-danger);
-      border-color: var(--color-danger);
+      background: rgba(217, 95, 75, 0.1);
+      border-left-color: var(--color-border);
     }
 
+    // Small variant for comments
     &--sm {
-      padding: 2px 6px;
+      margin-top: 0;
+    }
+    &--sm &__btn {
+      padding: 5px 12px;
       font-size: 10px;
     }
-
-    &:disabled {
-      opacity: 0.4;
-      cursor: default;
-    }
-  }
-
-  .vote-score {
-    min-width: 2ch;
-    text-align: center;
-    font-size: var(--text-sm);
-    font-weight: 600;
-    color: var(--color-text-muted);
-
-    &--pos {
-      color: var(--color-primary);
-    }
-    &--neg {
-      color: var(--color-danger);
+    &--sm &__score {
+      padding: 0 8px;
+      min-width: 2rem;
     }
   }
 
@@ -580,22 +626,8 @@
   }
 
   .comment {
-    display: flex;
-    gap: var(--space-4);
     padding: var(--space-4) 0;
     border-bottom: 1px solid var(--color-border);
-
-    &__vote {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--space-1);
-      min-width: 28px;
-    }
-
-    &__body {
-      flex: 1;
-    }
 
     &__meta {
       display: flex;
@@ -611,31 +643,42 @@
       color: var(--color-text);
     }
 
-    &__delete {
-      background: none;
-      border: none;
-      padding: 0;
-      cursor: pointer;
-      color: var(--color-danger);
-      font-size: var(--text-sm);
-      margin-left: auto;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-
     &__text {
       font-size: var(--text-base);
       line-height: 1.65;
       white-space: pre-wrap;
       overflow-wrap: break-word;
       word-break: break-word;
+      margin-bottom: var(--space-3);
+    }
+
+    &__footer {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-top: var(--space-3);
+    }
+
+    &__delete {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+      letter-spacing: 0.04em;
+      opacity: 0.5;
+
+      &:hover {
+        color: var(--color-danger);
+        opacity: 1;
+      }
     }
   }
 
   .comment-form {
     margin-top: var(--space-6);
+    margin-bottom: var(--space-7);
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
