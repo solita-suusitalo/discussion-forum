@@ -1,7 +1,29 @@
 @use 'variables';
 @use 'reset';
 
-// ─── Utility classes ──────────────────────────────────────────────────────────
+// --- Keyframe animations -------------------------------------------------------
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pop {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.45); }
+  100% { transform: scale(1); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// --- Layout -------------------------------------------------------------------
 
 .container {
   width: 100%;
@@ -10,102 +32,127 @@
   padding-inline: var(--space-4);
 }
 
-// ─── Buttons ──────────────────────────────────────────────────────────────────
+// --- Buttons ------------------------------------------------------------------
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-sm);
-  font-weight: 500;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.4;
   border: 1px solid transparent;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast), box-shadow var(--t-fast);
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
 
   &--primary {
-    background-color: var(--color-primary);
-    color: #fff;
-
-    &:hover {
-      background-color: var(--color-primary-dark);
-      text-decoration: none;
-    }
+    background: var(--color-primary);
+    color: var(--color-bg);
+    border-color: var(--color-primary);
+    &:hover { background: var(--color-primary-dark); border-color: var(--color-primary-dark); text-decoration: none; }
   }
 
   &--outline {
-    background-color: transparent;
-    color: var(--color-primary);
-    border-color: var(--color-primary);
+    background: transparent;
+    color: var(--color-text-muted);
+    border-color: var(--color-border);
+    &:hover { background: var(--color-surface-2); border-color: var(--color-border); color: var(--color-text); text-decoration: none; }
+  }
 
-    &:hover {
-      background-color: var(--color-primary);
-      color: #fff;
-      text-decoration: none;
-    }
+  &--ghost {
+    background: transparent;
+    color: var(--color-text-muted);
+    border-color: transparent;
+    &:hover { background: var(--color-surface-2); color: var(--color-text); text-decoration: none; }
   }
 
   &--danger {
-    background-color: var(--color-danger);
-    color: #fff;
+    background: transparent;
+    color: var(--color-danger);
+    border-color: currentColor;
+    &:hover { background: var(--color-danger); color: var(--color-bg); text-decoration: none; }
+  }
 
-    &:hover {
-      background-color: darken(#c0392b, 8%);
-      text-decoration: none;
-    }
+  &--sm {
+    padding: 4px 12px;
+    font-size: var(--text-xs);
+  }
+
+  &--lg {
+    padding: 10px 24px;
+    font-size: var(--text-md);
   }
 }
 
-// ─── Form elements ────────────────────────────────────────────────────────────
+// --- Forms --------------------------------------------------------------------
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
 
   label {
     font-size: var(--text-sm);
-    font-weight: 500;
+    font-weight: 600;
     color: var(--color-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
   }
 
-  input,
-  textarea {
-    padding: var(--space-2) var(--space-3);
+  input, textarea, select {
+    width: 100%;
+    padding: 9px 13px;
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background-color: var(--color-surface);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
     color: var(--color-text);
-    transition: border-color 0.15s;
+    background: var(--color-surface-2);
+    outline: none;
+    transition: border-color var(--t-fast), box-shadow var(--t-fast);
 
+    &::placeholder { color: var(--color-text-muted); opacity: 0.5; }
     &:focus {
-      outline: none;
       border-color: var(--color-primary);
+      box-shadow: var(--shadow-focus);
     }
   }
 
   textarea {
-    min-height: 8rem;
     resize: vertical;
+    min-height: 100px;
+    line-height: 1.5;
   }
 }
 
-// ─── Error / status messages ──────────────────────────────────────────────────
+// --- Alerts -------------------------------------------------------------------
 
 .alert {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
   font-size: var(--text-sm);
-  border: 1px solid currentColor;
 
-  &--error {
-    color: var(--color-danger);
-    background-color: #fdf2f0;
-  }
+  &--error   { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+  &--info    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  &--success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+}
 
-  &--success {
-    color: #217a3c;
-    background-color: #f0faf4;
-  }
+// --- Divider ------------------------------------------------------------------
+
+.divider {
+  height: 1px;
+  background: var(--color-border);
+  border: none;
+  margin: 0;
 }

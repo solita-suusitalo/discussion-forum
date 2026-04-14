@@ -1,13 +1,16 @@
-// ─── Colour palette ───────────────────────────────────────────────────────────
+// ─── Theme: Midnight Editorial ────────────────────────────────────────────────
 :root {
-  --color-bg:           #f8f7f4;
-  --color-surface:      #ffffff;
-  --color-border:       #e2e0db;
-  --color-text:         #1a1917;
-  --color-text-muted:   #6b6860;
-  --color-primary:      #3a6ea5;
-  --color-primary-dark: #2c5481;
-  --color-danger:       #c0392b;
+  // ─── Colours ──────────────────────────────────────────────────────────────
+  --color-bg:           #100f0e;
+  --color-surface:      #1c1b18;
+  --color-surface-2:    #252420;
+  --color-border:       #302e2a;
+  --color-text:         #ece7dd;
+  --color-text-muted:   #7a756c;
+  --color-primary:      #c9a14a;
+  --color-primary-dark: #a8832a;
+  --color-primary-dim:  rgba(201, 161, 74, 0.10);
+  --color-danger:       #d95f4b;
 
   // ─── Spacing ──────────────────────────────────────────────────────────────
   --space-1: 0.25rem;   //  4px
@@ -16,26 +19,40 @@
   --space-4: 1rem;      // 16px
   --space-5: 1.5rem;    // 24px
   --space-6: 2rem;      // 32px
+  --space-7: 2.5rem;    // 40px
   --space-8: 3rem;      // 48px
+  --space-10: 5rem;     // 80px
 
   // ─── Typography ───────────────────────────────────────────────────────────
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Fira Code', 'Cascadia Code', monospace;
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans:    'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-body:    var(--font-sans);
+  --font-mono:    'DM Mono', 'Fira Code', 'Cascadia Code', monospace;
 
+  --text-xs:   0.75rem;   // 12px
   --text-sm:   0.875rem;  // 14px
   --text-base: 1rem;      // 16px
+  --text-md:   1.0625rem; // 17px
   --text-lg:   1.125rem;  // 18px
   --text-xl:   1.25rem;   // 20px
   --text-2xl:  1.5rem;    // 24px
   --text-3xl:  1.875rem;  // 30px
+  --text-4xl:  2.5rem;    // 40px
+  --text-5xl:  3.5rem;    // 56px
 
   // ─── Layout ───────────────────────────────────────────────────────────────
-  --max-width: 56rem;    // 896px — comfortable reading width
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --max-width:   52rem;   // 832px — comfortable reading width
+  --radius-sm:   3px;
+  --radius-md:   6px;
+  --radius-lg:   12px;
+  --radius-full: 9999px;
+
+  // ─── Motion ───────────────────────────────────────────────────────────────
+  --t-fast: 120ms ease;
+  --t-base: 220ms ease;
 
   // ─── Shadows ──────────────────────────────────────────────────────────────
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
+  --shadow-sm:    0 1px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md:    0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-focus: 0 0 0 3px rgba(201, 161, 74, 0.30);
 }

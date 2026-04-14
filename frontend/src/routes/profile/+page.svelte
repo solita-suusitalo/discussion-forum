@@ -35,7 +35,7 @@
   async function handleLogout() {
     try {
       await createApi(globalThis.fetch, auth.current?.token).delete(
-        "/auth/logout",
+        "/auth/logout"
       );
     } finally {
       auth.logout();
