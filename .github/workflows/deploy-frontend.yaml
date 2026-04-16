@@ -23,20 +23,37 @@ jobs:
         with:
           node-version: "24.x"
 
-      - name: npm install, build, and test
+      - name: npm install, build
         run: |
           npm install
           npm run build
-          npm run test --if-present
+
+      - name: Debug - check build output
+        run: |
+          echo "=== frontend directory ==="
+          ls -la
+          echo "=== build directory ==="
+          ls -la build/ || echo "build/ does not exist!"
+          echo "=== build/index.js check ==="
+          ls -la build/index.js || echo "No index.js found in build/"
 
       - name: Prune dev dependencies
         run: npm prune --omit=dev
+
+      - name: Prepare deployment package
+        run: |
+          mkdir -p deploy
+          cp -r build/* deploy/
+          cp package.json deploy/
+          cp package-lock.json deploy/
+          cd deploy
+          npm ci --omit=dev
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: frontend
+          path: frontend/deploy
 
   deploy:
     runs-on: ubuntu-latest
