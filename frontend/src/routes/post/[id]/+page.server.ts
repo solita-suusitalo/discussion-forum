@@ -1,9 +1,9 @@
 import { createApi, ApiError } from "$lib/api";
 import type { Post } from "$lib/types";
-import type { PageLoad } from "./$types";
+import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
-export const load: PageLoad = async ({ fetch, params }) => {
+export const load: PageServerLoad = async ({ fetch, params }) => {
   const api = createApi(fetch);
   const id = Number(params.id);
   if (isNaN(id)) {

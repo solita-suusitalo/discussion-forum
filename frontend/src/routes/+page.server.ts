@@ -1,8 +1,8 @@
 import { createApi } from "$lib/api";
 import type { PostSummary } from "$lib/types";
-import type { PageLoad } from "./$types";
+import type { PageServerLoad } from "./$types";
 
-export const load: PageLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch }) => {
   const api = createApi(fetch);
   const posts = await api.get<PostSummary[]>("/posts");
   return {
