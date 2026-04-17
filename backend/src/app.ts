@@ -14,15 +14,26 @@ app.set("trust proxy", 1);
 // credentials: true is required so the browser accepts Set-Cookie from the API.
 // origin must be an explicit URL (not '*') when credentials are involved.
 // Build allowed origins from CORS_ORIGIN (comma-separated) + local defaults.
-const allowedOrigins = [
+const allowedOrigins = new Set([
     "http://localhost:3000",
     "http://localhost:5173",
-    ...(process.env.CORS_ORIGIN?.split(",").map((o) => o.trim()) ?? []),
-].filter(Boolean);
+    ...(process.env.CORS_ORIGIN?.split(",")
+        .map((o) => o.trim())
+        .filter(Boolean) ?? []),
+]);
 
 app.use(
     cors({
-        origin: allowedOrigins,
+        origin(requestOrigin, callback) {
+            // Allow requests with no Origin header (SSR, curl, same-origin)
+            if (!requestOrigin || allowedOrigins.has(requestOrigin)) {
+                callback(null, requestOrigin ?? true);
+            } else {
+                callback(
+                    new Error(`Origin ${requestOrigin} not allowed by CORS`)
+                );
+            }
+        },
         credentials: true,
     })
 );
