@@ -18,10 +18,6 @@
  */
 import { env } from "$env/dynamic/public";
 
-const BASE = env.PUBLIC_API_URL
-  ? `${env.PUBLIC_API_URL}/api`
-  : "http://localhost:3000/api";
-
 type RequestOptions = Omit<RequestInit, "body" | "method">;
 
 // createApi takes SvelteKit's fetch (or falls back to globalThis.fetch).
@@ -31,6 +27,10 @@ export function createApi(
   fetch: typeof globalThis.fetch = globalThis.fetch,
   token?: string
 ) {
+  const base = env.PUBLIC_API_URL
+    ? `${env.PUBLIC_API_URL.replace(/\/+$/, "")}/api`
+    : "http://localhost:3000/api";
+
   const authHeader: Record<string, string> = token
     ? { Authorization: `Bearer ${token}` }
     : {};
@@ -41,7 +41,7 @@ export function createApi(
     body?: unknown,
     options: RequestOptions = {}
   ): Promise<T> {
-    const res = await fetch(`${BASE}${path}`, {
+    const res = await fetch(`${base}${path}`, {
       method,
       headers: {
         "Content-Type": "application/json",
